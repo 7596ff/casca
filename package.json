@@ -1,0 +1,26 @@
+{
+  "name": "casca",
+  "version": "0.0.1",
+  "description": "an eris bot framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bippum/casca.git"
+  },
+  "keywords": [
+    "eris",
+    "discord"
+  ],
+  "author": "alexa",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bippum/casca/issues"
+  },
+  "homepage": "https://github.com/bippum/casca#readme",
+  "devDependencies": {
+    "eris": "^0.8.1"
+  }
+}
