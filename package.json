@@ -20,7 +20,7 @@
     "url": "https://github.com/bippum/casca/issues"
   },
   "homepage": "https://github.com/bippum/casca#readme",
-  "devDependencies": {
+  "dependencies": {
     "eris": "^0.8.1"
   }
 }
