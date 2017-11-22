@@ -1,0 +1,5 @@
+{
+    "role": "BIGINT",
+    "channel": "BIGINT",
+    "member": "BIGINT"
+}

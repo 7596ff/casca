@@ -1,1 +1,3 @@
 node_modules/
+tests/config.json
+tests/migrations.json

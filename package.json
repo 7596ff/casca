@@ -21,6 +21,8 @@
   },
   "homepage": "https://github.com/bippum/casca#readme",
   "dependencies": {
-    "eris": "^0.8.1"
+    "eris": "^0.8.1",
+    "eventemitter3": "^2.0.3",
+    "pg": "^7.4.0"
   }
 }

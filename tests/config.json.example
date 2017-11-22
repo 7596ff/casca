@@ -1,0 +1,17 @@
+{
+    "token": "TOKEN HERE",
+    "postgres": {
+        "host": "HOST",
+        "user": "USER",
+        "password": "PASSWORD",
+        "database": "DATABASE"
+    },    
+    "prefix": "!",
+    "commands": "./commands",
+    "settings": {
+        "botboy": "role",
+        "botspam": "channel",
+        "timeout": "INT",
+        "randomrole": "role"
+    }
+}
