@@ -15,4 +15,6 @@ client.on("error", (error, id) => {
     console.error(error);
 });
 
-client.connect();
+client.load().then(() => {
+    client.connect();
+});
