@@ -14,18 +14,20 @@ class Client extends EventEmitter {
         });
 
         this.bot = new Eris(options.token, options.eris);
-        this.bot.on("ready", this.ready);
-        this.bot.on("guildCreate", this.guildCreate);
-        this.bot.on("guildUpdate", this.guildUpdate);
-        this.bot.on("guildDelete", this.guildDelete);
-        this.bot.on("messageCreate", this.messageCreate);
-        this.bot.on("error", this.error);
+        this.bot.on("ready", () => this.ready());
+        this.bot.on("guildCreate", (guild) => this.guildCreate(guild));
+        this.bot.on("guildUpdate", (guild, oldGuild) => this.guildUpdate(guild, oldGuild));
+        this.bot.on("guildDelete", (guild) => this.guildDelete(guild));
+        this.bot.on("messageCreate", (message) => this.messageCreate(message));
+        this.bot.on("error", (error, id) => this.error(error, id));
     }
 
-    async connect() {
-        await this.pg.connect();
-
-        
+    connect() {
+        this.emit("info", "Connecting to postgres...");
+        this.pg.connect().then(() => {
+            this.emit("info", "Connecting to discord...");
+            this.bot.connect();
+        });
     }
 
     ready() {
