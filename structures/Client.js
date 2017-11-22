@@ -1,6 +1,13 @@
+const fs = require("fs");
 const Eris = require ("eris");
 const EventEmitter = require("eventemitter3");
 const Postgres = require("pg");
+
+var names = fs.readdirSync("../commands");
+const commands = {};
+for (let name of names) {
+    commands[name.split(".")[0]] = require(`../commands/${name}`);
+}
 
 class Client extends EventEmitter {
     constructor(options) {
@@ -49,7 +56,7 @@ class Client extends EventEmitter {
     }
 
     messageCreate(message) {
-        
+
     }
 
     error(error, id) {
