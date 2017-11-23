@@ -11,7 +11,12 @@ client.on("info", (message) => {
     console.log(message);
 });
 
-client.on("error", (error, id) => {
+client.on("bot", (message) => {
+    console.log(message);
+});
+
+client.on("error", (status, error) => {
+    console.error(status);
     console.error(error);
 });
 

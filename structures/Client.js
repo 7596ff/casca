@@ -74,16 +74,35 @@ class Client extends EventEmitter {
         this.emit("ready");
     }
 
-    guildCreate(gulid) {
-
+    guildCreate(guild) {
+        this.emit("bot", `JOINED GUILD: ${guild.id}/${guild.name}`);
+        this.pg.query({
+            text: "INSERT INTO guilds (id, name) VALUES ($1, $2)",
+            values: [guild.id, guild.name.slice(0, 20)]
+        }).catch((error) => {
+            this.emit("error", `Couldn't insert guild ${guild.id}/${guild.name}`, error);
+        });
     }
 
     guildUpdate(guild, oldGuild) {
-
+        if (guild.name !== oldGuild.name) {
+            this.pg.query({
+                text: "UPDATE guilds SET name = $1 WHERE id = $2",
+                values: [guild.name.slice(0, 20), guild.id]
+            }).catch((error) => {
+                this.emit("error", `Couldn't update guild ${guild.id}/${guild.name}`, error);
+            });
+        }
     }
 
     guildDelete(guild) {
-
+        this.emit("bot", `LEFT GUILD:  ${guild.id}/${guild.name}`);
+        this.pg.query({
+            text: "DELETE FROM guilds WHERE id = $1",
+            values: [guild.id]
+        }).catch((error) => {
+            this.emit("error", `Couldn't delete guild ${guild.id}/${guild.name}`, error);
+        });
     }
 
     messageCreate(message) {
@@ -91,7 +110,7 @@ class Client extends EventEmitter {
     }
 
     error(error, id) {
-        this.emit("error", error, id);
+        this.emit("error", `Error on shard ${id}`, error);
     }
 }
 
