@@ -191,9 +191,6 @@ class Client extends EventEmitter {
         );
 
         let shouldExecute = false;
-        let channelCD = `channelCD:${message.channel.id}`;
-        let memberCD = `memberCD:${message.channel.guild.id}:${message.author.id}`;
-
         if (command.ignoreCooldowns) shouldExecute = true;
         if (row.botspam == message.channel.id) shouldExecute = true;
 
@@ -219,6 +216,9 @@ class Client extends EventEmitter {
 
             return;
         }
+
+        let channelCD = `channelCD:${message.channel.id}`;
+        let memberCD = `memberCD:${message.channel.guild.id}:${message.author.id}`;
 
         if (row.channelCD && (this.cooldowns[channelCD] || 0) + (row.channelCD * 1000) > message.timestamp && !shouldExecute) {
             let msg = ctx.strings.get(
@@ -264,10 +264,9 @@ class Client extends EventEmitter {
             return;
         }
 
-        let output;
         try {
             if (command.typing) await message.channel.sendTyping();
-            output = await command.exec(message, ctx);
+            let output = await command.exec(message, ctx);
 
             this.emit("command", command.name, {
                 message,
