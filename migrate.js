@@ -7,7 +7,10 @@ const mappings = require("./mappings.json");
 
 const defaultColumns = {
     "id": "BIGINT NOT NULL",
-    "name": "VARCHAR(20)"
+    "name": "TEXT",
+    "channelCD": "INT DEFAULT 0",
+    "memberCD": "INT DEFAULT 0",
+    "locale": "TEXT"
 };
 
 function isEquivalent(a, b) {
@@ -24,16 +27,19 @@ function isEquivalent(a, b) {
     return true;
 }
 
-async function addColumns(columns, settings) {
-    for (let key of Object.keys(settings)) {
-        if (Object.keys(mappings).includes(settings[key])) {
-            settings[key] = mappings[settings[key]];
+async function addColumns(columns, config) {
+    for (let key of Object.keys(config.settings)) {
+        if (Object.keys(mappings).includes(config.settings[key])) {
+            config.settings[key] = mappings[config.settings[key]];
         }
 
         if (!columns[key]) {
-            columns[key] = settings[key];
+            columns[key] = config.settings[key];
         }
     }
+
+    if (config.guildPrefix) columns.prefix = "TEXT";
+    if (config.botspamChannel) columns.botspam = "BIGINT";
 
     return columns;
 }
@@ -55,7 +61,7 @@ async function migrate(config) {
         console.log("Guilds table exists.\nDetermining if we need to migrate the schema...");
 
         let columns = Object.assign({}, defaultColumns);
-        columns = await addColumns(columns, config.settings);
+        columns = await addColumns(columns, config);
 
         let migrations;
         try {
@@ -117,7 +123,11 @@ async function migrate(config) {
         console.log("Guilds table does not exist.\nGenerating schema...");
 
         let columns = Object.assign({}, defaultColumns);
-        columns = await addColumns(columns, config.settings);
+
+        if (config.guildPrefix) columns.prefix = "TEXT";
+        if (config.botspamChannel) columns.botspam = "BIGINT";
+
+        columns = await addColumns(columns, config);
 
         console.log("Writing schema to migrations.json...");
         let migrations = {};

@@ -1,5 +1,5 @@
-async function exec(ctx) {
-    return "pong";
+async function exec(message, ctx) {
+    return ctx.send("pong");
 }
 
 module.exports = {

@@ -20,6 +20,10 @@ client.on("error", (status, error) => {
     console.error(error);
 });
 
+client.on("command", (command, ctx, output) => {
+    console.log(`executed ${command}`);
+});
+
 client.load().then(() => {
     client.connect();
 });

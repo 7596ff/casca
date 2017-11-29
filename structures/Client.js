@@ -2,21 +2,43 @@ const fs = require("fs");
 const Eris = require ("eris");
 const EventEmitter = require("eventemitter3");
 const Postgres = require("pg");
+const prettyms = require("pretty-ms");
+
+const Context = require("./Context");
+const Strings = require("./Strings");
 
 const readdirAsync = require("util").promisify(fs.readdir);
 
-var names = fs.readdirSync("../commands");
+var commandNames = fs.readdirSync("../commands");
 const commands = {};
-for (let name of names) {
+for (let name of commandNames) {
     commands[name.split(".")[0]] = require(`../commands/${name}`);
+}
+
+var localeNames = fs.readdirSync("../locales");
+const locales = {};
+for (let name of localeNames) {
+    locales[name.split(".")[0]] = require(`../locales/${name}`);
 }
 
 class Client extends EventEmitter {
     constructor(options) {
         super();
 
-        this.options = options;
+        this.options = Object.assign({
+            prefix: "!",
+            defaultLocale: "en",
+            allowCommandDisabling: false,
+            guildPrefix: false,
+            botspamChannel: false,
+            sendCooldownMessages: false,
+        }, options);
+
         this.commands = {};
+        this.locales = {};
+        this.guildCache = {};
+        this.cooldowns = {};
+        this.isReady = false;
 
         this.pg = new Postgres.Client(options.postgres);
         this.pg.on("error", (error) => {
@@ -71,6 +93,7 @@ class Client extends EventEmitter {
     }
 
     ready() {
+        this.isReady = true;
         this.emit("ready");
     }
 
@@ -96,7 +119,7 @@ class Client extends EventEmitter {
     }
 
     guildDelete(guild) {
-        this.emit("bot", `LEFT GUILD:  ${guild.id}/${guild.name}`);
+        this.emit("bot", `LEFT GUILD: ${guild.id}/${guild.name}`);
         this.pg.query({
             text: "DELETE FROM guilds WHERE id = $1",
             values: [guild.id]
@@ -105,8 +128,163 @@ class Client extends EventEmitter {
         });
     }
 
-    messageCreate(message) {
+    async getGuild(id) {
+        if (this.guildCache[id] && this.guildCache[id].expires + 60000 > Date.now()) {
+            return Object.assign({}, this.guildCache[id]);
+        } else {
+            let res = await this.pg.query({
+                text: "SELECT * FROM guilds WHERE id = $1;",
+                values: [id]
+            });
 
+            this.guildCache[id] = Object.assign({}, res.rows[0]);
+            this.guildCache[id].expires = Date.now();
+            return Object.assign({}, this.guildCache[id]);
+        }
+    }
+
+    checkDisabled(row, channel, command) {
+        if (!this.allowCommandDisabling) return false;
+        if (!row.disabled) return false;
+        if (!row.disabled[channel]) return false;
+        if (!row.disabled[channel].includes(command)) return false;
+
+        return true;
+    }
+
+    async messageCreate(message) {
+        if (!this.isReady) return;
+        if (!message.channel.guild) return;
+        if (!message.author) return;
+        if (message.member && message.member.bot) return;
+        if (message.author && message.author.id == this.bot.user.id) return;
+
+        let row = await this.getGuild(message.channel.guild.id);
+
+        let isCommand = false;
+
+        if (message.content.startsWith(this.options.prefix)) {
+            isCommand = true;
+            message.content = message.content.replace(this.options.prefix, "");
+        } else if (message.content.startsWith(row.prefix)) {
+            isCommand = true;
+            message.content = message.content.replace(row.prefix, "");
+        }
+
+        if (!isCommand) return;
+
+        let command = message.content.split(" ").shift().toLowerCase();
+
+        for (let cmd in this.commands) {
+            if (cmd.aliases && cmd.aliases.includes(command)) command = cmd.name;
+        }
+
+        command = this.commands[command];
+        if (!command) return;
+
+        let ctx = new Context(message);
+        ctx.strings = new Strings(
+            this.locales[row.locale] || {},
+            this.locales[this.options.defaultLocale] || {},
+            locales[row.locale] || {},
+            locales[this.options.defaultLocale] || {}
+        );
+
+        let shouldExecute = false;
+        let channelCD = `channelCD:${message.channel.id}`;
+        let memberCD = `memberCD:${message.channel.guild.id}:${message.author.id}`;
+
+        if (command.ignoreCooldowns) shouldExecute = true;
+        if (row.botspam == message.channel.id) shouldExecute = true;
+
+        if (this.checkDisabled(row, message.channel.id, command.name) && !shouldExecute) {
+            let msg;
+            if (row.botspam) {
+                msg = ctx.strings.get("bot_botspam_redirect", row.botspam);
+            } else {
+                msg = ctx.strings.get("bot_botspam");
+            }
+
+            try {
+                await ctx.failure(msg);
+            } catch (error) {
+                this.emit("error", {
+                    text: "Error sending botspam redirect message",
+                    channel: message.channel.id,
+                    guild: message.channel.guild.id,
+                    member: message.author.id,
+                    timestamp: Date.now()
+                }, error);
+            }
+
+            return;
+        }
+
+        if (row.channelCD && (this.cooldowns[channelCD] || 0) + (row.channelCD * 1000) > message.timestamp && !shouldExecute) {
+            let msg = ctx.strings.get(
+                "bot_cooldown_redirect",
+                message.channel.mention,
+                prettyms((row.channelCD * 1000) - (message.timestamp - this.cooldowns[channelCD]))
+            );
+
+            try {
+                await ctx.delete(8000, msg);
+            } catch (error) {
+                this.emit("error", {
+                    text: "Error sending channel cooldown redirect message",
+                    channel: message.channel.id,
+                    guild: message.channel.guild.id,
+                    member: message.author.id,
+                    timestamp: Date.now()
+                }, error);
+            }
+
+            return;
+        }
+
+        if (row.memberCD && (this.cooldowns[memberCD] || 0) + (row.memberCD * 1000) > message.timestamp && !shouldExecute) {
+            let msg = ctx.strings.get(
+                "bot_cooldown_redirect",
+                message.channel.mention,
+                prettyms((row.channelCD * 1000) - (message.timestamp - this.cooldowns[channelCD]))
+            );
+
+            try {
+                await ctx.delete(8000, msg);
+            } catch (error) {
+                this.emit("error", {
+                    text: "Error sending channel cooldown redirect message",
+                    channel: message.channel.id,
+                    guild: message.channel.guild.id,
+                    member: message.author.id,
+                    timestamp: Date.now()
+                }, error);
+            }
+
+            return;
+        }
+
+        let output;
+        try {
+            if (command.typing) await message.channel.sendTyping();
+            output = await command.exec(message, ctx);
+
+            this.emit("command", command.name, {
+                message,
+                channel: message.channel.id,
+                guild: message.channel.guild.id,
+                member: message.author.id,
+                timestamp: Date.now()
+            }, output);
+        } catch (error) {
+            this.emit("error", {
+                text: `Error executing command ${command.name}`,
+                channel: message.channel.id,
+                guild: message.channel.guild.id,
+                member: message.author.id,
+                timestamp: Date.now()
+            }, error);
+        }
     }
 
     error(error, id) {
