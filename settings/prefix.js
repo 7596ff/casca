@@ -23,9 +23,15 @@ async function exec(message, ctx) {
     }
 }
 
+async function checks(member, ctx) {
+    if (!this.permission) return true;
+    return member.permission.has(this.permission);
+}
+
 module.exports = {
     name: "prefix",
     category: "settings",
     immune: true,
+    checks,
     exec
 };

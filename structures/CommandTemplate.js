@@ -7,9 +7,10 @@ const expressions = {
 };
 
 class CommandTemplate {
-    constructor(name, type) {
+    constructor(name, data) {
         this.name = name;
-        this.type = type;
+        this.type = data.type;
+        this.permission = data.permission;
         this.category = "settings";
         this.immune = true;
     }
@@ -28,6 +29,11 @@ class CommandTemplate {
         }
 
         return data;
+    }
+
+    async checks(member, ctx) {
+        if (!this.permission) return true;
+        return member.permission.has(this.permission);
     }
 
     async exec(message, ctx) {

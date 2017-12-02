@@ -102,19 +102,25 @@ class Client extends EventEmitter {
 
         if (this.options.allowCommandDisabling) {
             this.commands.enable = settings.enable;
+            this.commands.enable.permission = this.options.allowCommandDisabling;
+
             this.commands.disable = settings.disable;
+            this.commands.disable.permission = this.options.allowCommandDisabling;
         }
 
         if (this.options.guildPrefix) {
             this.commands.prefix = settings.prefix;
+            this.commands.prefix.permission = this.options.guildPrefix;
         }
 
         if (this.options.botspamChannel) {
             this.commands.botspam = new CommandTemplate("botspam", "channel");
+            this.commands.botspam.permission = this.options.botspamChannel;
         }
 
         if (this.options.cooldowns) {
             this.commands.cooldowns = settings.cooldowns;
+            this.commands.cooldowns.permission = this.options.cooldowns;
         }
 
         if (this.options.settings) {
@@ -318,6 +324,19 @@ class Client extends EventEmitter {
             }
 
             return;
+        }
+
+        if (command.checks) {
+            let check = await command.checks(message.member, ctx);
+            if (!check) {
+                try {
+                    await ctx.failure(ctx.strings.get("bot_no_permission"));
+                } catch (error) {
+                    this.emit("error", new CommandOutput("Error sending no permission message", message), error);
+                }
+
+                return;
+            }
         }
 
         try {

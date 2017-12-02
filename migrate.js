@@ -29,12 +29,12 @@ function isEquivalent(a, b) {
 
 async function addColumns(columns, config) {
     for (let key of Object.keys(config.settings)) {
-        if (Object.keys(mappings).includes(config.settings[key])) {
-            config.settings[key] = mappings[config.settings[key]];
+        if (Object.keys(mappings).includes(config.settings[key].type)) {
+            config.settings[key].type = mappings[config.settings[key].type];
         }
 
         if (!columns[key]) {
-            columns[key] = config.settings[key];
+            columns[key] = config.settings[key].type;
         }
     }
 
