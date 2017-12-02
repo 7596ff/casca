@@ -1,3 +1,12 @@
+const FuzzySet = require("fuzzyset.js");
+
+function decideMatch(nick, user) {
+    if (!nick) return false;
+    if (!user) return true;
+
+    return nick[0][0] > user[0][0];
+}
+
 class Context {
     constructor(message) {
         this.message = message;
@@ -5,6 +14,41 @@ class Context {
 
     get options() {
         return this.message.content.split(" ").slice(1);
+    }
+
+    get content() {
+        return this.message.content.split(" ").slice(1).join(" ");
+    }
+
+    findMember(name) {
+        let usernames = FuzzySet(this.message.channel.guild.members.map((member) => member.username));
+        let nicknames = FuzzySet(this.message.channel.guild.members.filter((member) => member.nick).map((member) => member.nick));
+
+        let threshold = 0.8;
+
+        if (this.message.channel.guild.members.size < 5000) {
+            threshold = this.message.channel.guild.members.size / 5000 * 0.3 + 0.5;
+        }
+
+        let matchedUsername = usernames.get(name);
+        let matchedNickname = nicknames.get(name);
+
+        let nickOrUser = decideMatch(matchedNickname, matchedUsername);
+        let matched = nickOrUser ? matchedNickname : matchedUsername;
+
+        if (matched && matched[0][0] >= threshold && matched[0][1]) {
+            let member = this.message.channel.guild.members.find((member) => {
+                if (nickOrUser) {
+                    return member.nick == matched[0][1];
+                } else {
+                    return member.username == matched[0][1];
+                }
+            });
+
+            return member.id;
+        }
+
+        return false;
     }
 
     async send() {

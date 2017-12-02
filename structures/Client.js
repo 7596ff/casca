@@ -6,6 +6,8 @@ const prettyms = require("pretty-ms");
 
 const Context = require("./Context");
 const Strings = require("./Strings");
+const CommandOutput = require("./CommandOutput");
+const CommandTemplate = require("./CommandTemplate");
 
 const readdirAsync = require("util").promisify(fs.readdir);
 
@@ -19,6 +21,12 @@ var localeNames = fs.readdirSync("../locales");
 const locales = {};
 for (let name of localeNames) {
     locales[name.split(".")[0]] = require(`../locales/${name}`);
+}
+
+var settingsNames = fs.readdirSync("../settings");
+const settings = {};
+for (let name of settingsNames) {
+    settings[name.split(".")[0]] = require(`../settings/${name}`);
 }
 
 class Client extends EventEmitter {
@@ -74,6 +82,31 @@ class Client extends EventEmitter {
             }
         }
 
+        this.emit("info", "Loading settings commands...");
+
+        if (this.options.allowCommandDisabling) {
+            this.commands.enable = settings.enable;
+            this.commands.disable = settings.disable;
+        }
+
+        if (this.options.guildPrefix) {
+            this.commands.prefix = settings.prefix;
+        }
+
+        if (this.options.botspamChannel) {
+            this.commands.botspam = new CommandTemplate("botspam", "channel");
+        }
+
+        if (this.options.cooldowns) {
+            this.commands.cooldowns = settings.cooldowns;
+        }
+
+        if (this.options.settings) {
+            for (let setting of Object.keys(this.options.settings)) {
+                this.commands[setting] = new CommandTemplate(setting, this.options.settings[setting])
+            }
+        }
+
         this.emit("info", "Loading custom commands...");
         let names = await readdirAsync(this.options.commands);
         for (let name of names) {
@@ -95,6 +128,34 @@ class Client extends EventEmitter {
     ready() {
         this.isReady = true;
         this.emit("ready");
+        this.syncGuilds();
+    }
+
+    async syncGuilds() {
+        try {
+            let res = await this.pg.query("SELECT id FROM guilds;");
+
+            let pgGuilds = res.rows.map((row) => row.id);
+            let discordGuilds = this.bot.guilds.map((guild) => guild.id);
+
+            let differences = discordGuilds.filter((guild) => !pgGuilds.includes(guild));
+
+            if (!differences.length) return;
+
+            console.log(`${differences.length} new guild(s) found, inserting...`);
+
+            for (let id of differences) {
+                await this.pg.query({
+                    text: "INSERT INTO guilds (id, name) VALUES ($1, $2)",
+                    values: [id, this.bot.guilds.get(id).name]
+                });
+            }
+
+            console.log("Done.");
+        } catch (error) {
+            console.error(error);
+            console.error("Error syncing guilds");
+        }
     }
 
     guildCreate(guild) {
@@ -183,6 +244,7 @@ class Client extends EventEmitter {
         if (!command) return;
 
         let ctx = new Context(message);
+        ctx.client = this;
         ctx.strings = new Strings(
             this.locales[row.locale] || {},
             this.locales[this.options.defaultLocale] || {},
@@ -191,7 +253,7 @@ class Client extends EventEmitter {
         );
 
         let shouldExecute = false;
-        if (command.ignoreCooldowns) shouldExecute = true;
+        if (command.immune) shouldExecute = true;
         if (row.botspam == message.channel.id) shouldExecute = true;
 
         if (this.checkDisabled(row, message.channel.id, command.name) && !shouldExecute) {
@@ -205,13 +267,7 @@ class Client extends EventEmitter {
             try {
                 await ctx.failure(msg);
             } catch (error) {
-                this.emit("error", {
-                    text: "Error sending botspam redirect message",
-                    channel: message.channel.id,
-                    guild: message.channel.guild.id,
-                    member: message.author.id,
-                    timestamp: Date.now()
-                }, error);
+                this.emit("error", new CommandOutput("Error sending botspam redirect message", message), error);
             }
 
             return;
@@ -220,45 +276,33 @@ class Client extends EventEmitter {
         let channelCD = `channelCD:${message.channel.id}`;
         let memberCD = `memberCD:${message.channel.guild.id}:${message.author.id}`;
 
-        if (row.channelCD && (this.cooldowns[channelCD] || 0) + (row.channelCD * 1000) > message.timestamp && !shouldExecute) {
+        if (row.channelcd && (this.cooldowns[channelCD] || 0) + (row.channelcd * 1000) > message.timestamp && !shouldExecute) {
             let msg = ctx.strings.get(
                 "bot_cooldown_redirect",
                 message.channel.mention,
-                prettyms((row.channelCD * 1000) - (message.timestamp - this.cooldowns[channelCD]))
+                prettyms((row.channelcd * 1000) - (message.timestamp - this.cooldowns[channelCD]), { verbose: true })
             );
 
             try {
-                await ctx.delete(8000, msg);
+                if (this.options.sendCooldownMessages) await ctx.delete(8000, msg);
             } catch (error) {
-                this.emit("error", {
-                    text: "Error sending channel cooldown redirect message",
-                    channel: message.channel.id,
-                    guild: message.channel.guild.id,
-                    member: message.author.id,
-                    timestamp: Date.now()
-                }, error);
+                this.emit("error", new CommandOutput("Error sending channel cooldown redirect message", message), error);
             }
 
             return;
         }
 
-        if (row.memberCD && (this.cooldowns[memberCD] || 0) + (row.memberCD * 1000) > message.timestamp && !shouldExecute) {
+        if (row.membercd && (this.cooldowns[memberCD] || 0) + (row.membercd * 1000) > message.timestamp && !shouldExecute) {
             let msg = ctx.strings.get(
                 "bot_cooldown_redirect",
-                message.channel.mention,
-                prettyms((row.channelCD * 1000) - (message.timestamp - this.cooldowns[channelCD]))
+                message.author.mention,
+                prettyms((row.membercd * 1000) - (message.timestamp - this.cooldowns[memberCD]), { verbose: true })
             );
 
             try {
-                await ctx.delete(8000, msg);
+                if (this.options.sendCooldownMessages) await ctx.delete(8000, msg);
             } catch (error) {
-                this.emit("error", {
-                    text: "Error sending channel cooldown redirect message",
-                    channel: message.channel.id,
-                    guild: message.channel.guild.id,
-                    member: message.author.id,
-                    timestamp: Date.now()
-                }, error);
+                this.emit("error", new CommandOutput("Error sending member cooldown redirect message", message), error);
             }
 
             return;
@@ -266,7 +310,12 @@ class Client extends EventEmitter {
 
         try {
             if (command.typing) await message.channel.sendTyping();
-            let output = await command.exec(message, ctx);
+            let result = await command.exec(message, ctx);
+
+            if (command.category == "settings") delete this.guildCache[message.channel.guild.id];
+
+            this.cooldowns[channelCD] = message.timestamp;
+            this.cooldowns[memberCD] = message.timestamp;
 
             this.emit("command", command.name, {
                 message,
@@ -274,15 +323,9 @@ class Client extends EventEmitter {
                 guild: message.channel.guild.id,
                 member: message.author.id,
                 timestamp: Date.now()
-            }, output);
+            }, result);
         } catch (error) {
-            this.emit("error", {
-                text: `Error executing command ${command.name}`,
-                channel: message.channel.id,
-                guild: message.channel.guild.id,
-                member: message.author.id,
-                timestamp: Date.now()
-            }, error);
+            this.emit("error", new CommandOutput(`Error executing command ${command.name}`, message), error);
         }
     }
 

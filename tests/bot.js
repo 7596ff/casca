@@ -20,7 +20,7 @@ client.on("error", (status, error) => {
     console.error(error);
 });
 
-client.on("command", (command, ctx, output) => {
+client.on("command", (command, output, result) => {
     console.log(`executed ${command}`);
 });
 

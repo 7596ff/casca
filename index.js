@@ -5,6 +5,8 @@ function Casca(options) {
 }
 
 Casca.Client = Client;
+Casca.CommandOutput = require("./structures/CommandOutput");
+Casca.CommandTemplate = require("./structures/CommandTemplate");
 Casca.Context = require("./structures/Context");
 Casca.Strings = require("./structures/Strings");
 

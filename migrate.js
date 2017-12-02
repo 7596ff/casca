@@ -38,6 +38,8 @@ async function addColumns(columns, config) {
         }
     }
 
+    if (config.defaultLocale) columns.locale = `TEXT DEFAULT '${config.defaultLocale}'`;
+    if (config.allowCommandDisabling) columns.disabled = "jsonb DEFAULT '{}'";
     if (config.guildPrefix) columns.prefix = "TEXT";
     if (config.botspamChannel) columns.botspam = "BIGINT";
 

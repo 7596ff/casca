@@ -1,3 +1,21 @@
 {
-    
+    "bot_generic_error": "Something went wrong, and the error has been logged.",
+    "bot_bad_syntax": "Incorrect syntax.",
+    "bot_no_permission": "You do not have permission to use this command.",
+    "bot_botspam": "This command is disabled here!",
+    "bot_botspam_redirect": "This command is disabled here! Please try using it in <#%s>.",
+    "bot_cooldown_redirect": "%s, please cool down! %s left.",
+    "commands_disable_list": "All disabled commands in this channel: %s",
+    "commands_disable_none": "No disabled commands in this channel.",
+    "commands_prefix_reset": "Prefix reset.",
+    "commands_prefix_changed": "Prefix set to `%s`.",
+    "commands_template_no_data": "Please specify a(n) %s!",
+    "commands_template_role_not_found": "Couldn't find this role.",
+    "commands_template_channel_not_found": "Couldn't find this channel.",
+    "commands_template_member_not_found": "Couldn't find this member.",
+    "commands_template_not_an_int": "That is not a number!",
+    "commands_template_success": "Set %s %s to %s.",
+    "commands_cooldowns_bad_syntax": "Please specify channel- or member-specific cooldowns.",
+    "commands_cooldowns_channel_set": "Set channel limit to %s.",
+    "commands_cooldowns_member_set": "Set member limit to %s seconds."
 }
