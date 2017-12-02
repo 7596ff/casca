@@ -8,6 +8,7 @@ const Context = require("./Context");
 const Strings = require("./Strings");
 const CommandOutput = require("./CommandOutput");
 const CommandTemplate = require("./CommandTemplate");
+const SubcommandProcessor = require("./SubcommandProcessor");
 
 const readdirAsync = require("util").promisify(fs.readdir);
 
@@ -62,6 +63,21 @@ class Client extends EventEmitter {
         this.bot.on("error", (error, id) => this.error(error, id));
     }
 
+    async loadCustomCommands(dir, commands) {
+        let names = await readdirAsync(dir);
+
+        for (let filename of names) {
+            if (filename.split(".").length == 1) {
+                commands[filename] = new SubcommandProcessor(filename);
+                await this.loadCustomCommands(`${dir}/${filename}`, commands[filename].subcommands = {});
+            } else {
+                let name = filename.split(".")[0];
+                if (this.commands[name]) this.emit("info", `Overwriting default command for ${name}.`);
+                commands[name] = require(`${process.cwd()}/${dir}/${filename}`);
+            }
+        }
+    }
+
     async load() {
         this.emit("info", "Loading default commands...");
         
@@ -108,11 +124,7 @@ class Client extends EventEmitter {
         }
 
         this.emit("info", "Loading custom commands...");
-        let names = await readdirAsync(this.options.commands);
-        for (let name of names) {
-            if (this.commands[name]) this.emit("info", `Overwriting default command for ${name}.`);
-            this.commands[name] = require(`${this.options.commands}${name}`);
-        }
+        await this.loadCustomCommands(this.options.commands, this.commands);
 
         this.emit("info", `${Object.keys(this.commands).length} command(s) loaded.`);
     }

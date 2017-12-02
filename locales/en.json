@@ -17,5 +17,7 @@
     "commands_template_success": "Set %s %s to %s.",
     "commands_cooldowns_bad_syntax": "Please specify channel- or member-specific cooldowns.",
     "commands_cooldowns_channel_set": "Set channel limit to %s.",
-    "commands_cooldowns_member_set": "Set member limit to %s seconds."
+    "commands_cooldowns_member_set": "Set member limit to %s seconds.",
+    "template_sub_no_sub_commands": "No subcommands for this command group.",
+    "template_sub_commands_list": "List of available subcommands: %s"
 }
