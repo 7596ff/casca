@@ -6,12 +6,26 @@
         "password": "PASSWORD",
         "database": "DATABASE"
     },    
+    "eris": {},
     "prefix": "!",
+    "defaultLocale": "en",
     "commands": "./commands",
+    "allowCommandDisabling": "manageMessages",
+    "guildPrefix": "manageMessages",
+    "botspamChannel": "manageMessages",
+    "cooldowns": "manageMessages",
+    "sendCooldownMessages": true,
     "settings": {
-        "botboy": "role",
-        "botspam": "channel",
-        "timeout": "INT",
-        "randomrole": "role"
+        "botboy": {
+            "type": "role"
+        },
+        "timeout": {
+            "type": "INT",
+            "permission": "manageMessages"
+        },
+        "randomrole": {
+            "type": "role",
+            "permission": "manageMessages"
+        }
     }
 }
