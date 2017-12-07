@@ -3,6 +3,12 @@ class SubcommandProcessor {
         this.name = name;
     }
 
+    get category() {
+        if (!this.subcommands) return;
+
+        return (Object.values(this.subcommands)[0].category);
+    }
+
     async exec(message, ctx) {
         if (!this.subcommands) {
             return ctx.failure(ctx.strings.get("template_sub_no_sub_commands"))
@@ -44,6 +50,11 @@ class SubcommandProcessor {
                 member: message.author.id,
                 timestamp: Date.now()
             }, result);
+        } else {
+            return ctx.send(ctx.strings.get(
+                "template_sub_commands_list",
+                Object.keys(this.subcommands).map((name) => `\`${name}\``).join(" "))
+            );
         }
     }
 }

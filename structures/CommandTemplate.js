@@ -13,6 +13,7 @@ class CommandTemplate {
         this.permission = data.permission;
         this.category = "settings";
         this.immune = true;
+        this.generated = true;
     }
 
     prettyData(data, message) {

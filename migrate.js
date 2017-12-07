@@ -57,6 +57,9 @@ async function migrate(config) {
     await pg.connect();
     console.log("Connected.");
 
+    console.log("Creating an empty usage table if we don't have one already...");
+    await pg.query("CREATE TABLE IF NOT EXISTS usage (guild BIGINT NOT NULL, primary key (guild));");
+
     console.log("Checking if we have a guilds table...");
     let tableResult = await pg.query("SELECT to_regclass('guilds')");
     if (tableResult.rows[0].to_regclass) {

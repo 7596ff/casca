@@ -1,5 +1,9 @@
 {
-    "token": "TOKEN HERE",
+    "token": "TOKEN",
+    "owner": "OWNER_ID",
+    "permissions": 0,
+    "client_id": "CLIENT_ID",
+    "github": "GITHUB_REPO",
     "postgres": {
         "host": "HOST",
         "user": "USER",

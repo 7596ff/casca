@@ -51,7 +51,7 @@ class Client extends EventEmitter {
 
         this.pg = new Postgres.Client(options.postgres);
         this.pg.on("error", (error) => {
-            this.emit("error", error);
+            this.emit("error", "postgres", error);
         });
 
         this.bot = new Eris(options.token, options.eris);
@@ -72,7 +72,7 @@ class Client extends EventEmitter {
                 await this.loadCustomCommands(`${dir}/${filename}`, commands[filename].subcommands = {});
             } else {
                 let name = filename.split(".")[0];
-                if (this.commands[name]) this.emit("info", `Overwriting default command for ${name}.`);
+                if (commands[name]) this.emit("info", `Overwriting default command for ${name}.`);
                 commands[name] = require(`${process.cwd()}/${dir}/${filename}`);
             }
         }
@@ -138,8 +138,19 @@ class Client extends EventEmitter {
     connect() {
         this.emit("info", "Connecting to postgres...");
         this.pg.connect().then(() => {
-            this.emit("info", "Connecting to discord...");
-            this.bot.connect();
+            this.emit("info", "Altering usage table...");
+            let query = "ALTER TABLE usage ";
+            let columns = [];
+            for (let command of Object.values(this.commands)) {
+                columns.push(`ADD COLUMN IF NOT EXISTS ${command.name} BIGINT DEFAULT 0`);
+            }
+            query += columns.join(", ");
+            query += ";";
+
+            this.pg.query(query).then(() => {
+                this.emit("info", "Connecting to discord...");
+                this.bot.connect();
+            });
         });
     }
 
@@ -254,7 +265,7 @@ class Client extends EventEmitter {
 
         let command = message.content.split(" ").shift().toLowerCase();
 
-        for (let cmd in this.commands) {
+        for (let cmd of Object.values(this.commands)) {
             if (cmd.aliases && cmd.aliases.includes(command)) command = cmd.name;
         }
 
@@ -263,6 +274,7 @@ class Client extends EventEmitter {
 
         let ctx = new Context(message);
         ctx.client = this;
+        ctx.row = row;
         ctx.strings = new Strings(
             this.locales[row.locale] || {},
             this.locales[this.options.defaultLocale] || {},
@@ -347,6 +359,17 @@ class Client extends EventEmitter {
 
             this.cooldowns[channelCD] = message.timestamp;
             this.cooldowns[memberCD] = message.timestamp;
+
+            try {
+                await this.pg.query([
+                    `INSERT INTO usage (guild, ${command.name})`, 
+                    `VALUES (${message.channel.guild.id}, 1)`,
+                    `ON CONFLICT (guild) DO`,
+                    `UPDATE SET ${command.name} = usage.${command.name} + 1 WHERE usage.guild = ${message.channel.guild.id};`
+                ].join(" "));
+            } catch (error) {
+                this.emit("error", "Error updating usage", error);
+            }
 
             this.emit("command", command.name, {
                 message,

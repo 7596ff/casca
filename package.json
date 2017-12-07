@@ -24,6 +24,7 @@
     "eris": "^0.8.1",
     "eventemitter3": "^2.0.3",
     "fuzzyset.js": "0.0.4",
+    "pad": "^2.0.3",
     "pg": "^7.4.0",
     "pretty-ms": "^3.1.0",
     "sprintf-js": "^1.1.1"
