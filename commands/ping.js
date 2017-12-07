@@ -5,7 +5,6 @@ async function exec(message, ctx) {
 
 module.exports = {
     name: "ping",
-    aliases: ["pang"],
     category: "utility",
     exec
 };
