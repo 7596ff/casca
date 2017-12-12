@@ -39,7 +39,7 @@ class CommandTemplate {
 
     async exec(message, ctx) {
         try {
-            if (!ctx.options.length) {
+            if (!ctx.options.length && this.type !== "BOOLEAN") {
                 return ctx.failure(ctx.strings.get("commands_template_no_data", this.type));
             }
 
@@ -90,8 +90,10 @@ class CommandTemplate {
                 if (isNaN(data)) {
                     return ctx.failure(ctx.strings.get("commands_template_not_an_int"));
                 }
-            } else if (this.type = "text") { 
+            } else if (this.type == "text") { 
                 data = ctx.content;
+            } else if (this.type == "BOOLEAN") {
+                data = !ctx.row[this.name];
             }
 
             let res = await ctx.client.pg.query({
@@ -99,7 +101,7 @@ class CommandTemplate {
                 values: [data, message.channel.guild.id]
             });
 
-            return ctx.success(ctx.strings.get("commands_template_success", this.name, this.type, this.prettyData(data, message)));
+            return ctx.success(ctx.strings.get("commands_template_success", this.name, (this.type || "setting").toLowerCase(), this.prettyData(data, message)));
         } catch (error) {
             ctx.failure(ctx.strings.get("bot_generic_error"));
             throw error;
