@@ -13,23 +13,24 @@ const SubcommandProcessor = require("./SubcommandProcessor");
 
 const readdirAsync = require("util").promisify(fs.readdir);
 
-var commandNames = fs.readdirSync("../commands");
 const commands = {};
-for (let name of commandNames) {
-    commands[name.split(".")[0]] = require(`../commands/${name}`);
-}
+commands.botstats = require("../commands/botstats");
+commands.eval = require("../commands/eval");
+commands.help = require("../commands/help");
+commands.invite = require("../commands/invite");
+commands.ping = require("../commands/ping");
+commands.pong = require("../commands/pong");
+commands.shardinfo = require("../commands/shardinfo");
+commands.usage = require("../commands/usage");
 
-var localeNames = fs.readdirSync("../locales");
 const locales = {};
-for (let name of localeNames) {
-    locales[name.split(".")[0]] = require(`../locales/${name}`);
-}
+locales.en = require("../locales/en.json");
 
-var settingsNames = fs.readdirSync("../settings");
 const settings = {};
-for (let name of settingsNames) {
-    settings[name.split(".")[0]] = require(`../settings/${name}`);
-}
+settings.cooldowns = require("../settings/cooldowns");
+settings.disable = require("../settings/disable");
+settings.enable = require("../settings/enable");
+settings.prefix = require("../settings/prefix");
 
 class Client extends EventEmitter {
     constructor(options) {
