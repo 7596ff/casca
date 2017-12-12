@@ -103,7 +103,7 @@ async function migrate(config) {
                 let queryString = "ALTER TABLE guilds ";
     
                 for (name of newColumnNames) {
-                    queryString += `ADD COLUMN ${name} ${columns[name]}`;
+                    queryString += `ADD COLUMN ${name} ${columns[name]} `;
                 }
     
                 queryString += ";";
