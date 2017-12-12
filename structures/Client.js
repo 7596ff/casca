@@ -155,7 +155,9 @@ class Client extends EventEmitter {
 
         if (this.options.settings) {
             for (let setting of Object.keys(this.options.settings)) {
-                this.commands[setting] = new CommandTemplate(setting, this.options.settings[setting])
+                if (this.options.settings[setting].cmd !== false) {
+                    this.commands[setting] = new CommandTemplate(setting, this.options.settings[setting]);
+                }
             }
         }
 
