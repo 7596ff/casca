@@ -18,6 +18,14 @@
     "botspamChannel": "manageMessages",
     "cooldowns": "manageMessages",
     "sendCooldownMessages": true,
+    "status": [{
+        "name": "a game",
+        "type": 0
+    }, {
+        "name": "some tunes",
+        "type": 2
+    }],
+    "statusCron": "*/15 * * * * *",
     "settings": {
         "botboy": {
             "type": "role"

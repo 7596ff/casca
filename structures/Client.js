@@ -3,6 +3,7 @@ const Eris = require ("eris");
 const EventEmitter = require("eventemitter3");
 const Postgres = require("pg");
 const prettyms = require("pretty-ms");
+const CronJob = require("cron").CronJob;
 
 const Context = require("./Context");
 const Strings = require("./Strings");
@@ -48,6 +49,35 @@ class Client extends EventEmitter {
         this.guildCache = {};
         this.cooldowns = {};
         this.isReady = false;
+
+        if (options.status) {
+            if (Array.isArray(options.status)) {
+                let cron = "0 */30 * * * *";
+                this.statuses = options.status;
+
+                try {
+                    new CronJob(options.statusCron, () => console.log("a"));
+                    cron = options.statusCron;
+                } catch (err) {
+                    console.error(`Invalid Cron pattern: ${options.statusCron}`);
+                }
+
+                this.statusJob = new CronJob(cron, () => {
+                    let status = this.statuses[Math.floor(Math.random() * this.statuses.length)];
+
+                    if (typeof(status) === "string") {
+                        status = {
+                            name: status,
+                            type: 0
+                        };
+                    }
+
+                    this.bot.editStatus("online", status);
+                }, null, false);
+            } else {
+                this.status = options.status;
+            }
+        }
 
         this.pg = new Postgres.Client(options.postgres);
         this.pg.on("error", (error) => {
@@ -158,6 +188,17 @@ class Client extends EventEmitter {
         this.isReady = true;
         this.emit("ready");
         this.syncGuilds();
+
+        if (typeof(this.status) === "string") {
+            this.bot.editStatus("online", {
+                name: this.status,
+                type: 0
+            });
+        } else if (typeof(this.status) === "object") {
+            this.bot.editStatus("online", this.status);
+        } else {
+            this.statusJob.start();
+        }
     }
 
     async syncGuilds() {
