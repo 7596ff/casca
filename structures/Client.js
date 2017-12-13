@@ -109,6 +109,15 @@ class Client extends EventEmitter {
         }
     }
 
+    async loadCustomLocales(dir, locales) {
+        let names = await readdirAsync(dir);
+
+        for (let filename of names) {
+            let name = filename.split(".")[0];
+            locales[name] = require(`${process.cwd()}/${dir}/${filename}`);
+        }
+    }
+
     async load() {
         this.emit("info", "Loading default commands...");
         
@@ -164,6 +173,9 @@ class Client extends EventEmitter {
 
         this.emit("info", "Loading custom commands...");
         await this.loadCustomCommands(this.options.commands, this.commands);
+
+        this.emit("info", "Loading custom locales...");
+        await this.loadCustomLocales(this.options.locales, this.locales);
 
         this.emit("info", `${Object.keys(this.commands).length} command(s) loaded.`);
     }
