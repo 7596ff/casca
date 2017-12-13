@@ -199,7 +199,7 @@ class Client extends EventEmitter {
             });
         } else if (typeof(this.status) === "object") {
             this.bot.editStatus("online", this.status);
-        } else {
+        } else if (this.statusJob) {
             this.statusJob.start();
         }
     }
