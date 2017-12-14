@@ -4,9 +4,9 @@ class CommandOutput {
     constructor(text, message) {
         this.text = text;
         this.content = message.content;
-        this.channel = message.channel.id;
-        this.guild = message.channel.guild.id;
-        this.user = message.author.id;
+        this.channel = message.channel;
+        this.guild = message.channel.guild;
+        this.user = message.author;
         this.timestamp = Date.now();
     }
 }
