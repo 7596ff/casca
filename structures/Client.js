@@ -427,13 +427,7 @@ class Client extends EventEmitter {
                 this.emit("error", "Error updating usage", error);
             }
 
-            this.emit("command", command.name, {
-                message,
-                channel: message.channel.id,
-                guild: message.channel.guild.id,
-                member: message.author.id,
-                timestamp: Date.now()
-            }, result);
+            this.emit("command", new CommandOutput(command.name, message), result);
         } catch (error) {
             this.emit("error", new CommandOutput(`Error executing command ${command.name}`, message), error);
         }
