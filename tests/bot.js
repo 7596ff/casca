@@ -20,8 +20,8 @@ client.on("error", (status, error) => {
     console.error(error);
 });
 
-client.on("command", (command, output, result) => {
-    console.log(`executed ${command}`);
+client.on("command", (output, result) => {
+    console.log(`executed ${command.text}`);
 });
 
 client.load().then(() => {

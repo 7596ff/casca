@@ -11,7 +11,6 @@ async function formatHelp(ctx, command) {
     rows.push(bold(ctx.strings.get("help_name"), command.name));
 
     if (command.generated) {
-        
         rows.push(
             bold(ctx.strings.get("help_usage"), `\`${ctx.row.prefix || ctx.client.options.prefix}${command.name} <${command.type}>\``),
             "",

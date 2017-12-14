@@ -171,11 +171,15 @@ class Client extends EventEmitter {
             }
         }
 
-        this.emit("info", "Loading custom commands...");
-        await this.loadCustomCommands(this.options.commands, this.commands);
+        if (this.options.commands) {
+            this.emit("info", "Loading custom commands...");
+            await this.loadCustomCommands(this.options.commands, this.commands);
+        }
 
-        this.emit("info", "Loading custom locales...");
-        await this.loadCustomLocales(this.options.locales, this.locales);
+        if (this.options.locales) {
+            this.emit("info", "Loading custom locales...");
+            await this.loadCustomLocales(this.options.locales, this.locales);
+        }
 
         this.emit("info", `${Object.keys(this.commands).length} command(s) loaded.`);
     }

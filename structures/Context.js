@@ -21,6 +21,11 @@ class Context {
     }
 
     findMember(name) {
+        let id;
+        if (!isNaN(id = name.replace(/\D/g, ""))) {
+            return id;
+        }
+
         let usernames = FuzzySet(this.message.channel.guild.members.map((member) => member.username));
         let nicknames = FuzzySet(this.message.channel.guild.members.filter((member) => member.nick).map((member) => member.nick));
 
