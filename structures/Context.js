@@ -72,6 +72,10 @@ class Context {
         return this.message.channel.createMessage(`❌ ${str}`);
     }
 
+    async code(lang, str) {
+        return this.message.channel.createMessage(`\`\`\`${lang}\n${str}\n\`\`\``);
+    }
+
     async delete() {
         let args = Array.from(arguments);
         return this.message.channel.createMessage(...args.slice(1)).then((msg) => {
