@@ -1,3 +1,5 @@
+const CommandOutput = require("./CommandOutput");
+
 class SubcommandProcessor {
     constructor(name) {
         this.name = name;
@@ -43,13 +45,7 @@ class SubcommandProcessor {
             let result = await subcommand.exec(message, ctx);
             if (subcommand.category == "settings") delete ctx.client.guildCache[message.channel.guild.id];
 
-            ctx.client.emit("command", `${ctx.path.join("/")}/${subcommand.name}`, {
-                message,
-                channel: message.channel.id,
-                guild: message.channel.guild.id,
-                member: message.author.id,
-                timestamp: Date.now()
-            }, result);
+            ctx.client.emit("command", new CommandOutput(`${ctx.path.join("/")}/${subcommand.name}`, message), result);
         } else {
             return ctx.send(ctx.strings.get(
                 "template_sub_commands_list",
