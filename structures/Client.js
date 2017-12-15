@@ -357,7 +357,7 @@ class Client extends EventEmitter {
             try {
                 await ctx.failure(msg);
             } catch (error) {
-                this.emit("error", new CommandOutput("Error sending botspam redirect message", message), error);
+                this.emit("error", new CommandOutput("Error sending botspam redirect message", ctx), error);
             }
 
             return;
@@ -376,7 +376,7 @@ class Client extends EventEmitter {
             try {
                 if (this.options.sendCooldownMessages) await ctx.delete(8000, msg);
             } catch (error) {
-                this.emit("error", new CommandOutput("Error sending channel cooldown redirect message", message), error);
+                this.emit("error", new CommandOutput("Error sending channel cooldown redirect message", ctx), error);
             }
 
             return;
@@ -392,7 +392,7 @@ class Client extends EventEmitter {
             try {
                 if (this.options.sendCooldownMessages) await ctx.delete(8000, msg);
             } catch (error) {
-                this.emit("error", new CommandOutput("Error sending member cooldown redirect message", message), error);
+                this.emit("error", new CommandOutput("Error sending member cooldown redirect message", ctx), error);
             }
 
             return;
@@ -404,7 +404,7 @@ class Client extends EventEmitter {
                 try {
                     await ctx.failure(ctx.strings.get("bot_no_permission"));
                 } catch (error) {
-                    this.emit("error", new CommandOutput("Error sending no permission message", message), error);
+                    this.emit("error", new CommandOutput("Error sending no permission message", ctx), error);
                 }
 
                 return;
@@ -431,9 +431,9 @@ class Client extends EventEmitter {
                 this.emit("error", "Error updating usage", error);
             }
 
-            this.emit("command", new CommandOutput(command.name, message), result);
+            this.emit("command", new CommandOutput(command.name, ctx), result);
         } catch (error) {
-            this.emit("error", new CommandOutput(`Error executing command ${command.name}`, message), error);
+            this.emit("error", new CommandOutput(`Error executing command ${command.name}`, ctx), error);
         }
     }
 

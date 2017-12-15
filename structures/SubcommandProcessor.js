@@ -35,7 +35,7 @@ class SubcommandProcessor {
                     try {
                         await ctx.failure(ctx.strings.get("bot_no_permission"));
                     } catch (error) {
-                        ctx.client.emit("error", new CommandOutput("Error sending no permission message", message), error);
+                        ctx.client.emit("error", new CommandOutput("Error sending no permission message", ctx), error);
                     }
 
                     return;
@@ -45,7 +45,7 @@ class SubcommandProcessor {
             let result = await subcommand.exec(message, ctx);
             if (subcommand.category == "settings") delete ctx.client.guildCache[message.channel.guild.id];
 
-            ctx.client.emit("command", new CommandOutput(`${ctx.path.join("/")}/${subcommand.name}`, message), result);
+            ctx.client.emit("command", new CommandOutput(`${ctx.path.join("/")}/${subcommand.name}`, ctx), result);
         } else {
             return ctx.send(ctx.strings.get(
                 "template_sub_commands_list",

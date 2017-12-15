@@ -1,12 +1,12 @@
 // why am i not using typescript
 
 class CommandOutput {
-    constructor(text, message) {
+    constructor(text, ctx) {
         this.text = text;
-        this.content = message.content;
-        this.channel = message.channel;
-        this.guild = message.channel.guild;
-        this.user = message.author;
+        this.ctx = ctx;
+        this.channel = ctx.message.channel;
+        this.guild = ctx.message.channel.guild;
+        this.user = ctx.message.author;
         this.timestamp = Date.now();
     }
 }
