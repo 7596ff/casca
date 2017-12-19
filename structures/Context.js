@@ -72,8 +72,8 @@ class Context {
         return this.message.channel.createMessage(`❌ ${str}`);
     }
 
-    async code(lang, str) {
-        return this.message.channel.createMessage(`\`\`\`${lang}\n${str}\n\`\`\``);
+    async code(lang, str, file) {
+        return this.message.channel.createMessage(`\`\`\`${lang}\n${str}\n\`\`\``, file);
     }
 
     async delete() {
