@@ -43,6 +43,7 @@ class Client extends EventEmitter {
             guildPrefix: false,
             botspamChannel: false,
             sendCooldownMessages: false,
+            sendErrorMessages: false,
         }, options);
 
         this.commands = {};
@@ -434,6 +435,9 @@ class Client extends EventEmitter {
             this.emit("command", new CommandOutput(command.name, ctx), result);
         } catch (error) {
             this.emit("error", new CommandOutput(`Error executing command ${command.name}`, ctx), error);
+            if (this.options.sendErrorMessages) {
+                try { ctx.failure(ctx.strings.get("bot_generic_error")); } catch (error) {}
+            }
         }
     }
 

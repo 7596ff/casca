@@ -16,12 +16,12 @@ client.on("bot", (message) => {
 });
 
 client.on("error", (status, error) => {
-    console.error(status);
     console.error(error);
+    console.error(`${new Date().toJSON()} ${status.text}`);
 });
 
 client.on("command", (output, result) => {
-    console.log(`executed ${command.text}`);
+    console.log(`executed ${output.text}`);
 });
 
 client.load().then(() => {
