@@ -22,7 +22,7 @@ class Context {
 
     findMember(name) {
         let id;
-        if (!isNaN(id = name.replace(/\D/g, ""))) {
+        if (this.message.channel.guild.members.get(id = name.replace(/\D/g, ""))) {
             return id;
         }
 
