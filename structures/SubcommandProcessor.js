@@ -48,10 +48,17 @@ class SubcommandProcessor {
 
             ctx.client.emit("command", new CommandOutput(`${ctx.path.join("/")}/${subcommand.name}`, ctx), result);
         } else {
-            return ctx.send(ctx.strings.get(
-                "template_sub_commands_list",
-                Object.keys(this.subcommands).map((name) => `\`${name}\``).join(" "))
-            );
+            if (this.default) {
+                let result = await this.default.exec(message, ctx);
+                if (this.default.category == "settings") delete ctx.client.guildCache[message.channel.guild.id];
+
+                ctx.client.emit("command", new CommandOutput(`${ctx.path.join("/")}/${this.default.name}`, ctx), result);
+            } else {
+                return ctx.send(ctx.strings.get(
+                    "template_sub_commands_list",
+                    Object.keys(this.subcommands).map((name) => `\`${name}\``).join(" "))
+                );
+            }
         }
     }
 }

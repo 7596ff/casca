@@ -102,6 +102,7 @@ class Client extends EventEmitter {
             if (filename.split(".").length == 1) {
                 commands[filename] = new SubcommandProcessor(filename);
                 await this.loadCustomCommands(`${dir}/${filename}`, commands[filename].subcommands = {});
+                if (commands[filename].subcommands._default) commands[filename].default = commands[filename].subcommands._default;
             } else {
                 let name = filename.split(".")[0];
                 if (commands[name]) this.emit("info", `Overwriting default command for ${name}.`);
