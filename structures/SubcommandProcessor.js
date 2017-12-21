@@ -50,7 +50,7 @@ class SubcommandProcessor {
 
             ctx.client.emit("command", new CommandOutput(`${ctx.path.join("/")}/${subcommand.name}`, ctx), result);
         } else {
-            if (this.default) {
+            if (this.default && ctx.content) {
                 let result = await this.default.exec(message, ctx);
                 if (this.default.category == "settings") delete ctx.client.guildCache[message.channel.guild.id];
 
