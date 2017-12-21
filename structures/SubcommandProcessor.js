@@ -56,7 +56,9 @@ class SubcommandProcessor {
             } else {
                 return ctx.send(ctx.strings.get(
                     "template_sub_commands_list",
-                    Object.keys(this.subcommands).map((name) => `\`${name}\``).join(" "))
+                    Object.values(this.subcommands)
+                        .map((command) => `\`${command.name}\``)
+                        .join(" "))
                 );
             }
         }
