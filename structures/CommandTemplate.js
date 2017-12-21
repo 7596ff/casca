@@ -56,7 +56,8 @@ class CommandTemplate {
                     if (found && found[0][0] > 0.8 && found[0][1]) {
                         data = message.channel.guild.roles.find((role) => role.name == found[0][1]).id;
                     } else {
-                        return ctx.failure(ctx.strings.get("commands_template_role_not_found"));
+                        ctx.failure(ctx.strings.get("commands_template_role_not_found"));
+                        data = null;
                     }
                 }
             } else if (this.type == "channel") {
@@ -70,7 +71,8 @@ class CommandTemplate {
                     if (found && found[0][0] > 0.8 && found[0][1]) {
                         data = message.channel.guild.channels.find((channel) => channel.name == found[0][1]).id;
                     } else {
-                        return ctx.failure(ctx.strings.get("commands_template_channel_not_found"));
+                        ctx.failure(ctx.strings.get("commands_template_channel_not_found"));
+                        data = null;
                     }
                 }
             } else if (this.type == "member") {
@@ -82,7 +84,8 @@ class CommandTemplate {
                     if (member) {
                         data = member;
                     } else {
-                        return ctx.failure(ctx.strings.get("commands_template_member_not_found"));
+                        ctx.failure(ctx.strings.get("commands_template_member_not_found"));
+                        data = null;
                     }
                 }
             } else if (this.type == "INT") {
@@ -100,6 +103,8 @@ class CommandTemplate {
                 text: `UPDATE guilds SET ${this.name} = $1 WHERE id = $2;`, // THIS IS REALLY BAD
                 values: [data, message.channel.guild.id]
             });
+
+            if (data === null) return;
 
             return ctx.success(ctx.strings.get("commands_template_success", this.name, (this.type || "setting").toLowerCase(), this.prettyData(data, message)));
         } catch (error) {
