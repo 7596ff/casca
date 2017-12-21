@@ -17,10 +17,12 @@ class SubcommandProcessor {
             return ctx.failure(ctx.strings.get("template_sub_no_sub_commands"))
         }
 
-        if (!ctx.options.length) {
+        if (!ctx.options.length && !this.default) {
             return ctx.send(ctx.strings.get(
                 "template_sub_commands_list",
-                Object.keys(this.subcommands).map((name) => `\`${name}\``).join(" "))
+                Object.values(this.subcommands)
+                    .map((command) => `\`${command.name}\``)
+                    .join(" "))
             );
         }
 
@@ -52,7 +54,7 @@ class SubcommandProcessor {
                 let result = await this.default.exec(message, ctx);
                 if (this.default.category == "settings") delete ctx.client.guildCache[message.channel.guild.id];
 
-                ctx.client.emit("command", new CommandOutput(`${ctx.path.join("/")}/${this.default.name}`, ctx), result);
+                ctx.client.emit("command", new CommandOutput(this.default.name, ctx), result);
             } else {
                 return ctx.send(ctx.strings.get(
                     "template_sub_commands_list",
