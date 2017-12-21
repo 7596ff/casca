@@ -22,6 +22,7 @@ client.on("error", (status, error) => {
 
 client.on("command", (output, result) => {
     console.log(`executed ${output.text}`);
+    console.log(output.ctx.content)
 });
 
 client.load().then(() => {

@@ -3,6 +3,7 @@ const CommandOutput = require("./CommandOutput");
 class SubcommandProcessor {
     constructor(name) {
         this.name = name;
+        this.processor = true;
     }
 
     get category() {

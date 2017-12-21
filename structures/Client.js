@@ -432,7 +432,7 @@ class Client extends EventEmitter {
                 this.emit("error", "Error updating usage", error);
             }
 
-            this.emit("command", new CommandOutput(command.name, ctx), result);
+            if (!command.processor) this.emit("command", new CommandOutput(command.name, ctx), result);
         } catch (error) {
             this.emit("error", new CommandOutput(`Error executing command ${command.name}`, ctx), error);
             if (this.options.sendErrorMessages) {

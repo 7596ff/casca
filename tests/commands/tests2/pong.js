@@ -1,9 +1,9 @@
 async function exec(message, ctx) {
-    return ctx.send("pong 2");
+    return ctx.send("Pong");
 }
 
 async function checks(member, ctx) {
-    return false;
+    return true;
 }
 
 module.exports = {
