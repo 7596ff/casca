@@ -1,19 +1,15 @@
 async function embed(client) {
     let shardInfo = [`\`\`\`groovy\nShards: ${client.shards.size}`];
-    let users = new Array(client.shards.size).fill([]);
+    let users = new Array(client.shards.size).fill(new Map());
     let guilds = new Array(client.shards.size).fill(0);
 
     client.guilds.forEach((guild) => {
-        users[guild.shard.id].push(...guild.members.map((member) => member.id));
+        guild.members.map((member) => users[guild.shard.id].set(member.id, member.id));
         guilds[guild.shard.id] += 1;
     });
 
-    for (let user in users) {
-        users[user] = users[user].filter((item, index, array) => array.indexOf(item) === index).length;
-    }
-
     client.shards.forEach((shard) => {
-        shardInfo.push(`Shard ${shard.id}: ${guilds[shard.id]} guilds, ${users[shard.id]} users, ${shard.latency} ms`);
+        shardInfo.push(`Shard ${shard.id}: ${guilds[shard.id]} guilds, ${users[shard.id].size} users, ${shard.latency} ms`);
     });
 
     shardInfo.push("```");
