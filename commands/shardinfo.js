@@ -4,7 +4,7 @@ async function embed(client) {
     let guilds = new Array(client.shards.size).fill(0);
 
     client.guilds.forEach((guild) => {
-        users[guild.shard.id].push(guild.members.map((member) => member.id));
+        users[guild.shard.id].push(...guild.members.map((member) => member.id));
         guilds[guild.shard.id] += 1;
     });
 
