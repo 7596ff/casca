@@ -16,6 +16,7 @@ const readdirAsync = require("util").promisify(fs.readdir);
 const commands = {};
 commands.botstats = require("../commands/botstats");
 commands.eval = require("../commands/eval");
+commands.events = require("../commands/events");
 commands.help = require("../commands/help");
 commands.invite = require("../commands/invite");
 commands.ping = require("../commands/ping");
@@ -50,6 +51,7 @@ class Client extends EventEmitter {
         this.locales = {};
         this.guildCache = {};
         this.cooldowns = {};
+        this.events = {};
         this.isReady = false;
 
         if (options.status) {
@@ -88,6 +90,7 @@ class Client extends EventEmitter {
 
         this.bot = new Eris(options.token, options.eris);
         this.bot.on("ready", () => this.ready());
+        this.bot.on("rawWS", (packet, id) => this.rawWS(packet, id));
         this.bot.on("guildCreate", (guild) => this.guildCreate(guild));
         this.bot.on("guildUpdate", (guild, oldGuild) => this.guildUpdate(guild, oldGuild));
         this.bot.on("guildDelete", (guild) => this.guildDelete(guild));
@@ -219,6 +222,16 @@ class Client extends EventEmitter {
             this.bot.editStatus("online", this.status);
         } else if (this.statusJob) {
             this.statusJob.start();
+        }
+    }
+
+    rawWS(packet, id) {
+        if (packet.t == null) return;
+
+        if (!this.events[packet.t]) {
+            this.events[packet.t] = 1;
+        } else {
+            this.events[packet.t] += 1;
         }
     }
 
