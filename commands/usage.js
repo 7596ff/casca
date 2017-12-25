@@ -1,16 +1,17 @@
 async function exec(message, ctx) {
     let res, rows;
     if (ctx.options[0] == "all") {
-        res = await ctx.client.pg.query("SELECT * FROM usage;");
-        res.rows.reduce((acc, row) => {
-            for (let name of Object.keys(row)) {
-                if (name != "guild") {
-                    acc[name] = parseInt(acc[name]) + parseInt(row[name]);
-                }
-            }
-        });
-        rows = res.rows[0];
-        delete rows.guild;
+        schema = await ctx.client.pg.query("SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'usage';");
+
+        rows = {};
+
+        for (let row of schema.rows) {
+            if (row.column_name == "guilds") continue;
+
+            let res = await ctx.client.pg.query(`SELECT SUM(${row.column_name}) FROM usage;`);
+
+            rows[row.column_name] = res.rows[0].sum;
+        }
     } else {
         res = await ctx.client.pg.query({
             text: "SELECT * FROM usage WHERE guild = $1;", 
