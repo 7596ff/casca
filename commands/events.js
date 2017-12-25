@@ -1,5 +1,4 @@
 async function exec(message, ctx) {
-    console.log("asdf")
     let events = Object.keys(ctx.client.events)
         .map((key) => { return {key, count: ctx.client.events[key] }})
         .sort((a, b) => b.count - a.count)
