@@ -11,6 +11,7 @@ class CommandTemplate {
         this.name = name;
         this.type = data.type;
         this.permission = data.permission;
+        this.column = data.column || this.name;
         this.category = "settings";
         this.immune = true;
         this.generated = true;
@@ -96,11 +97,11 @@ class CommandTemplate {
             } else if (this.type == "text") { 
                 data = ctx.content;
             } else if (this.type == "BOOLEAN") {
-                data = !ctx.row[this.name];
+                data = !ctx.row[this.column];
             }
 
             let res = await ctx.client.pg.query({
-                text: `UPDATE guilds SET ${this.name} = $1 WHERE id = $2;`, // THIS IS REALLY BAD
+                text: `UPDATE guilds SET ${this.column} = $1 WHERE id = $2;`, // THIS IS REALLY BAD
                 values: [data, message.channel.guild.id]
             });
 
