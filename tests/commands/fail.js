@@ -5,5 +5,6 @@ async function exec(message, ctx) {
 module.exports = {
     name: "fail",
     category: "utility",
+    aliases: ["meirl"],
     exec
 };

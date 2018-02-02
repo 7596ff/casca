@@ -1,9 +1,31 @@
 {
+    "botstats": {
+        "description": "Displays information about the bot."
+    },
+    "events": {
+        "description": "Displays a list of all events the client has recieved since it started."
+    },
     "help": {
         "usage": "%shelp <command>",
         "description": "Displays a list of commands or help for a specific command.",
         "args": {
             "command": "the command to search for help"
         }
+    },
+    "invite": {
+        "description": "Provides a link to invite the bot to your server."
+    },
+    "ping": {
+        "description": "Returns the difference in time between when the bot recieved a message from Discord and when it finished sending."
+    },
+    "pong": {
+        "description": "Returns the ping of the last heartbeat between Discord and this shard."
+    },
+    "shardinfo": {
+        "description": "Displays info about all shards in the bot."
+    },
+    "usage": {
+        "usage": "%susage <all>",
+        "description": "Shows how many times each command has been used. Type usage all to see all servers."
     }
 }

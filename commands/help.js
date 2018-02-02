@@ -42,7 +42,7 @@ async function exec(message, ctx) {
         if (ctx.strings.has(search + "usage")) {
             msg.push("", bold(ctx.strings.get("help_usage"), `\`${ctx.strings.get(search + "usage", ctx.row.prefix || ctx.client.options.prefix)}\``));
         } else {
-            msg.push("", bold(ctx.strings.get("help_usage"), `${ctx.row.prefix || ctx.client.options.prefix}${name}`))
+            msg.push("", bold(ctx.strings.get("help_usage"), `\`${ctx.row.prefix || ctx.client.options.prefix}${name}\``))
         }
 
         if (command.aliases) {
