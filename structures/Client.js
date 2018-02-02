@@ -129,7 +129,7 @@ class Client extends EventEmitter {
     async loadCustomHelp(dir, locales) {
         let names;
         if (dir) {
-            names = await readdirAsync(`${process.cwd()}${dir}`);
+            names = await readdirAsync(dir);
         } else {
             names = Object.keys(help)
         }
@@ -140,7 +140,7 @@ class Client extends EventEmitter {
 
             let customhelp;
             if (dir) {
-                customhelp = require(`${process.cwd()}/${dir}/${name}`);
+                customhelp = require(dir);
             } else {
                 customhelp = help[name];
             }
