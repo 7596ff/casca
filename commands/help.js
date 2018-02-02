@@ -14,7 +14,7 @@ async function exec(message, ctx) {
         }
 
         for (let command of commands.filter((command) => command.aliases)) {
-            for (let alias of commands.aliases) {
+            for (let alias of command.aliases) {
                 names[alias] = command.name;
             }
         }
@@ -40,7 +40,13 @@ async function exec(message, ctx) {
         }
 
         if (ctx.strings.has(search + "usage")) {
-            msg.push(bold(ctx.strings.get("help_usage"), `\`${ctx.strings.get(search + "usage", ctx.row.prefix || ctx.client.options.prefix)}\``));
+            msg.push("", bold(ctx.strings.get("help_usage"), `\`${ctx.strings.get(search + "usage", ctx.row.prefix || ctx.client.options.prefix)}\``));
+        } else {
+            msg.push("", bold(ctx.strings.get("help_usage"), `${ctx.row.prefix || ctx.client.options.prefix}${name}`))
+        }
+
+        if (command.aliases) {
+            msg.push("", bold(ctx.strings.get("help_aliases"), command.aliases.join(", ")));
         }
 
         if (ctx.strings.has(search + "description")) {
@@ -54,6 +60,8 @@ async function exec(message, ctx) {
         if (Math.floor(Math.random() * 5) == 0) {
             msg.push("", ctx.strings.get("help_footer"));
         }
+
+        if (msg[0] === "") msg.splice(0, 1);
 
         return ctx.send(msg.join("\n"));
     } else {
