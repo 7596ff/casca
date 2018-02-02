@@ -140,7 +140,7 @@ class Client extends EventEmitter {
 
             let customhelp;
             if (dir) {
-                customhelp = require(dir);
+                customhelp = require(`${dir}/${name}`);
             } else {
                 customhelp = help[name];
             }
