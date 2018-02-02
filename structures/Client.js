@@ -123,6 +123,42 @@ class Client extends EventEmitter {
         }
     }
 
+    async loadCustomHelp(dir, locales) {
+        let names;
+        if (dir) {
+            names = await readdirAsync(`${process.cwd()}${dir}`);
+        } else {
+            names = await readdirAsync("../help");
+        }
+
+        for (let filename of names) {
+            let name = filename.split(".")[0];
+            if (!locales[name]) locales[name] = {};
+
+            let help;
+            if (dir) {
+                help = require(`${process.cwd()}/${dir}/${name}`);
+            } else {
+                help = require(`../help/${name}`);
+            }
+
+            for (let key of Object.keys(help)) {
+                let value = help[key];
+                
+                if (value.usage) locales[name][`help_command_${key}_usage`] = value.usage;
+                if (value.description) locales[name][`help_command_${key}_description`] = value.description;
+
+                if (value.args) {
+                    let i = 0;
+                    for (let arg in value.args) {
+                        locales[name][`help_command_${key}_args${i}`] = `\`${arg}\`: ${value.args[arg]}`;
+                        i++;
+                    }
+                }
+            }
+        }
+    }
+
     async load() {
         this.emit("info", "Loading default commands...");
         
@@ -184,6 +220,14 @@ class Client extends EventEmitter {
         if (this.options.locales) {
             this.emit("info", "Loading custom locales...");
             await this.loadCustomLocales(this.options.locales, this.locales);
+        }
+
+        this.emit("info", "Loading help locale...");
+        await this.loadCustomHelp(null, this.locales);
+
+        if (this.options.help) {
+            this.emit("info", "Loading custom help locale...");
+            await this.loadCustomHelp(this.options.help, this.locales);
         }
 
         this.emit("info", `${Object.keys(this.commands).length} command(s) loaded.`);

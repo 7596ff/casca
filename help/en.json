@@ -1,0 +1,9 @@
+{
+    "help": {
+        "usage": "%shelp <command>",
+        "description": "Displays a list of commands or help for a specific command.",
+        "args": {
+            "command": "the command to search for help"
+        }
+    }
+}

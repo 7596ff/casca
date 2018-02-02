@@ -25,6 +25,10 @@ class Strings {
         return sprintf(this.strings[str], ...Array.from(arguments).slice(1));
     }
 
+    has(str) {
+        return (!!~this.keys.indexOf(str));
+    }
+
     all(str, delim) {
         let res = this.keys.filter((item) => item.includes(str));
 

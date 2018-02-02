@@ -6,7 +6,56 @@ function bold(arg1, arg2) {
 
 async function exec(message, ctx) {
     if (ctx.content.length) {
+        let commands = Object.values(ctx.client.commands);
+        let names = {};
+        
+        for (let command of commands) {
+            names[command.name] = command.name
+        }
 
+        for (let command of commands.filter((command) => command.aliases)) {
+            for (let alias of commands.aliases) {
+                names[alias] = command.name;
+            }
+        }
+
+        if (!Object.keys(names).includes(ctx.content)) {
+            return ctx.send(ctx.strings.get("help_cant_find", ctx.content));
+        }
+
+        let name = names[ctx.content];
+
+        let msg = [];
+        let command = ctx.client.commands[name];
+        let search = `help_command_${name}_`;
+
+        if (command.generated) {
+            msg.push(
+                bold(ctx.strings.get("help_usage"), `\`${ctx.row.prefix || ctx.client.options.prefix}${command.name} <${command.type}>\``),
+                "",
+                ctx.strings.get("help_cmd_template_desc", command.name, command.type)
+            );
+    
+            return ctx.send(msg.join("\n"));
+        }
+
+        if (ctx.strings.has(search + "usage")) {
+            msg.push(bold(ctx.strings.get("help_usage"), `\`${ctx.strings.get(search + "usage", ctx.row.prefix || ctx.client.options.prefix)}\``));
+        }
+
+        if (ctx.strings.has(search + "description")) {
+            msg.push("", ctx.strings.get(search + "description"));
+        }
+
+        if (ctx.strings.has(search + "args0")) {
+            msg.push("", ...ctx.strings.all(search + "args", "array"));
+        }
+
+        if (Math.floor(Math.random() * 5) == 0) {
+            msg.push("", ctx.strings.get("help_footer"));
+        }
+
+        return ctx.send(msg.join("\n"));
     } else {
         let categories = Object.values(ctx.client.commands)
             .map((command) => command.category)

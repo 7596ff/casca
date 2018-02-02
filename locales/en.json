@@ -25,7 +25,6 @@
     "help_list_of_commands": "List of commands:",
     "help_instruction": "Use `%shelp <name>` to find out more about a specific command.",
     "help_cant_find": "Can't find help topic `%s`.",
-    "help_name": "Name",
     "help_usage": "Usage",
     "help_aliases": "Aliases",
     "help_args": "Arguments/Subcommands",
