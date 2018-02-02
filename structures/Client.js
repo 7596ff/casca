@@ -27,6 +27,9 @@ commands.usage = require("../commands/usage");
 const locales = {};
 locales.en = require("../locales/en.json");
 
+const help = {};
+help.en = require("../help/en.json");
+
 const settings = {};
 settings.cooldowns = require("../settings/cooldowns");
 settings.disable = require("../settings/disable");
@@ -128,22 +131,22 @@ class Client extends EventEmitter {
         if (dir) {
             names = await readdirAsync(`${process.cwd()}${dir}`);
         } else {
-            names = await readdirAsync("../help");
+            names = Object.keys(help)
         }
 
         for (let filename of names) {
             let name = filename.split(".")[0];
             if (!locales[name]) locales[name] = {};
 
-            let help;
+            let customhelp;
             if (dir) {
-                help = require(`${process.cwd()}/${dir}/${name}`);
+                customhelp = require(`${process.cwd()}/${dir}/${name}`);
             } else {
-                help = require(`../help/${name}`);
+                customhelp = help[name];
             }
 
-            for (let key of Object.keys(help)) {
-                let value = help[key];
+            for (let key of Object.keys(customhelp)) {
+                let value = customhelp[key];
                 
                 if (value.usage) locales[name][`help_command_${key}_usage`] = value.usage;
                 if (value.description) locales[name][`help_command_${key}_description`] = value.description;
