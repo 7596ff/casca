@@ -33,7 +33,9 @@ async function exec(message, ctx) {
             msg.push(
                 bold(ctx.strings.get("help_usage"), `\`${ctx.row.prefix || ctx.client.options.prefix}${command.name} <${command.type}>\``),
                 "",
-                ctx.strings.get("help_cmd_template_desc", command.name, command.type)
+                ctx.strings.has(search + "description")
+                    ? ctx.strings.get(search + "description")
+                    : ctx.strings.get("help_cmd_template_desc", command.name, command.type)
             );
     
             return ctx.send(msg.join("\n"));
