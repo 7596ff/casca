@@ -16,6 +16,33 @@ class Context {
         return this.message.content.split(" ").slice(1);
     }
 
+    get tokenized() {
+        let newString = [""];
+        let content = this.message.content.split("");
+        let insideString = false;
+
+        while (!!content.length) {
+            let character = content.shift();
+
+            if (character == "\"") {
+                insideString = !insideString;
+                continue;
+            }
+
+            if (character == " ") {
+                if (insideString) {
+                    newString[newString.length - 1] = newString[(newString.length - 1)] +  " ";
+                } else {
+                    newString.push("");
+                }
+            } else {
+                newString[newString.length - 1] = newString[(newString.length - 1)] + character;
+            }
+        }
+
+        return newString;
+    }
+
     get content() {
         return this.message.content.split(" ").slice(1).join(" ");
     }
