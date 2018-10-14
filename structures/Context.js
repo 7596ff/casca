@@ -18,7 +18,7 @@ class Context {
 
     get tokenized() {
         let newString = [""];
-        let content = this.message.content.split("");
+        let content = this.content.split("");
         let insideString = false;
 
         while (!!content.length) {
