@@ -312,7 +312,7 @@ class Client extends EventEmitter {
     guildCreate(guild) {
         this.emit("bot", `JOINED GUILD: ${guild.id}/${guild.name}`);
         this.pg.query({
-            text: "INSERT INTO guilds (id, name) VALUES ($1, $2)",
+            text: "INSERT INTO guilds (id, name) VALUES ($1, $2) ON CONFLICT DO NOTHING",
             values: [guild.id, guild.name.slice(0, 20)]
         }).catch((error) => {
             this.emit("error", `Couldn't insert guild ${guild.id}/${guild.name}`, error);
